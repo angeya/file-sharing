@@ -1,0 +1,13 @@
+server:
+  port: 8888
+
+spring:
+  application:
+    name: file-sharing
+
+app:
+  version: 1.0.0
+  file:
+    path: /root/file-sharing
+  password:
+    offset: 2
