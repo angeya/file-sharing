@@ -61,6 +61,9 @@ public class FileService {
      * @return 是否保存成功
      */
     public boolean saveTempText(String tempText) {
+        if (tempText == null) {
+            return false;
+        }
         if (tempText.length() > Constants.TEMP_TEXT_MAX_LENGTH) {
             this.tempText = tempText.substring(0, Constants.TEMP_TEXT_MAX_LENGTH);
         } else {

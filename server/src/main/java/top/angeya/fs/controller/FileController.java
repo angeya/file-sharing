@@ -3,6 +3,7 @@ package top.angeya.fs.controller;
 import lombok.AllArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+import top.angeya.fs.pojo.TempText;
 import top.angeya.fs.service.FileService;
 
 import javax.servlet.ServletRequest;
@@ -32,8 +33,8 @@ public class FileController {
     }
 
     @PutMapping("/temp-text")
-    public boolean saveTempText(String tempText) {
-        return this.fileService.saveTempText(tempText);
+    public boolean saveTempText(@RequestBody TempText tempText) {
+        return this.fileService.saveTempText(tempText.getContent());
     }
 
     @GetMapping("/temp-text")
