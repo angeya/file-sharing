@@ -5,26 +5,41 @@
     </header>
     <div class="main-container">
       <aside>
+        <el-upload
+            class="upload-demo"
+            drag
+            action="api/file-service/upload">
+          <i class="el-icon-upload"></i>
+          <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
+          <div class="el-upload__tip" slot="tip">文件上传说明</div>
+        </el-upload>
         <el-input
             type="textarea"
             autosize
             placeholder="请输入内容"
             v-model="tempText">
         </el-input>
-        <el-button @click="saveTempText">
-          save
-        </el-button>
-        <el-upload
-            class="upload-demo"
-            drag
-            action="https://jsonplaceholder.typicode.com/posts/"
-            multiple>
-          <i class="el-icon-upload"></i>
-          <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-          <div class="el-upload__tip" slot="tip">文件上传说明</div>
-        </el-upload>
+        <el-button @click="saveTempText">Save</el-button>
+        <el-button @click="saveTempText">Clean</el-button>
       </aside>
       <main>
+        <el-table
+            :data="fileList"
+            height="500"
+            border
+            style="width: 100%">
+          <el-table-column prop="name" label="File Name" width="200" align="center"></el-table-column>
+          <el-table-column prop="size" label="File Size" width="200" align="center">
+            <template scope="scope">
+              <span>{{scope.row.size / 1000}}kb</span>
+            </template>
+          </el-table-column>
+          <el-table-column prop="dateTime" label="Create Time" width="300"  align="center"></el-table-column>
+          <el-table-column prop="" label="Operation" width="300">
+            <el-button @click="saveTempText">Download</el-button>
+            <el-button @click="saveTempText">Delete</el-button>
+          </el-table-column>
+        </el-table>
       </main>
     </div>
     <footer>
@@ -38,26 +53,38 @@ export default {
   name: "FileSharing",
   data() {
     return {
-      tempText: ''
+      tempText: '',
+      fileList: []
     }
   },
   methods: {
+    switchFileSizeUnit(size) {
+
+    },
     getTempText() {
       this.axios.get('/file-service/temp-text').then(res => {
         this.tempText = res.data
-        console.log(res)
       })
     },
-    saveTempText() {
+    saveTempText(clean = false) {
+      if (clean) {
+        this.tempText = ''
+      }
       this.axios.put('/file-service/temp-text', {
         content: this.tempText
       }).then(res => {
-        console.log(res)
+        // do nothing
+      })
+    },
+    getFileList() {
+      this.axios.get('/file-service/file-list').then(res => {
+        this.fileList = res.data
       })
     }
   },
   mounted() {
     this.getTempText()
+    this.getFileList()
   }
 }
 </script>

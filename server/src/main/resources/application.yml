@@ -8,6 +8,6 @@ spring:
 app:
   version: 1.0.0
   file:
-    path: /root/file-sharing
+    dir: D:/root/file-sharing
   password:
     offset: 2
