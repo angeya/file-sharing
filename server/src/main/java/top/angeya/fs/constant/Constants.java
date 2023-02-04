@@ -23,4 +23,12 @@ public class Constants {
      * 临时文本最大长度
      */
     public static final int TEMP_TEXT_MAX_LENGTH = 1000;
+
+    /**
+     * 文件重名副本后缀
+     */
+    public static final String DUPLICATE_FILE_NAME_SUFFIX = "(1)";
+
+
+
 }

@@ -20,6 +20,7 @@ import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicLong;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -42,6 +43,18 @@ public class FileService {
      */
     @Value("${app.file.dir}")
     private String fileDirectory;
+
+    /**
+     * 文件最大数量
+     */
+    @Value("${app.file.max-number}")
+    public int fileMaxNumber;
+
+    /**
+     * 所有文件最大容量
+     */
+    @Value("${app.file.max-total-size}")
+    public long fileMaxTotalSize;
 
     /**
      * 临时文本
@@ -102,15 +115,40 @@ public class FileService {
     public boolean saveFile(MultipartFile file) {
         boolean result = true;
         Path directory = Paths.get(this.fileDirectory);
-        String name = file.getOriginalFilename();
-        assert name != null;
+        Path filePath = Paths.get(this.fileDirectory, file.getOriginalFilename());
+
+        // 文件重名则加上后缀重命名
+        while (Files.exists(filePath)) {
+            String oldName = filePath.getFileName().toString();
+            String newName = oldName.substring(0, oldName.lastIndexOf("."))
+                    + Constants.DUPLICATE_FILE_NAME_SUFFIX + oldName.substring(oldName.lastIndexOf("."));
+            filePath = Paths.get(filePath.getParent().toString(), newName);
+        }
         try {
             if (!Files.isDirectory(directory)) {
                 Files.createDirectory(directory);
             }
-            Path filePath = Paths.get(this.fileDirectory, file.getOriginalFilename());
+            // 判断文件个数是否超限
+            if (Files.list(directory).count() >= this.fileMaxNumber) {
+                log.info("File max number is : {}", this.fileMaxNumber);
+                return false;
+            }
+            // 判断所有文件大小是否超限
+            AtomicLong filesTotalSize = new AtomicLong(0);
+            Files.list(directory).forEach(path -> {
+                try {
+                    filesTotalSize.accumulateAndGet(Files.size(path), Long::sum);
+                } catch (IOException e) {
+                    log.warn("Get file size error, path is {}", path, e);
+                }
+            });
+            if (filesTotalSize.get() >= this.fileMaxTotalSize) {
+                log.info("Files total size is  {}, now is {} ", this.fileMaxTotalSize, filesTotalSize);
+                return false;
+            }
             Files.createFile(filePath);
             Files.write(filePath, file.getBytes());
+            log.info("Save file {} success", filePath.getFileName());
         } catch (IOException e) {
             log.error("Save file error", e);
             result = false;
@@ -147,7 +185,7 @@ public class FileService {
         boolean result = true;
         try {
             Files.deleteIfExists(path);
-            log.info("Delete file: {}", fileName);
+            log.info("Delete file {} success", fileName);
         } catch (IOException e) {
             result = false;
             log.error("Delete file error", e);
