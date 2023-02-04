@@ -9,6 +9,7 @@ import top.angeya.fs.service.FileService;
 
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 import java.util.List;
 
@@ -62,8 +63,14 @@ public class FileController {
      * @return 上传结果
      */
     @PostMapping("/upload")
-    public boolean upload(MultipartFile file) throws IOException {
+    public boolean upload(MultipartFile file) {
         return fileService.saveFile(file);
+    }
+
+
+    @GetMapping("/download-file")
+    public void downloadFile(String fileName, HttpServletResponse response) throws IOException {
+        this.fileService.downloadFile(fileName, response);
     }
 
     /**

@@ -7,15 +7,18 @@ import org.springframework.web.multipart.MultipartFile;
 import top.angeya.fs.constant.Constants;
 import top.angeya.fs.pojo.FileInfo;
 
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -115,6 +118,25 @@ public class FileService {
         return result;
     }
 
+    public void downloadFile(String fileName, HttpServletResponse response) {
+        Path path = Paths.get(this.fileDirectory, fileName);
+        // 读到流中
+        try (InputStream inputStream = new FileInputStream(path.toString())) {
+            response.reset();
+            response.setContentType("application/octet-stream");
+            response.addHeader("Content-Disposition", "attachment; filename=" + fileName);
+            ServletOutputStream outputStream = response.getOutputStream();
+            byte[] b = new byte[1024];
+            int len;
+            //从输入流中读取一定数量的字节，并将其存储在缓冲区字节数组中，读到末尾返回-1
+            while ((len = inputStream.read(b)) > 0) {
+                outputStream.write(b, 0, len);
+            }
+        } catch (Exception e) {
+            log.error("Download file error", e);
+        }
+    }
+
     /**
      * 获取文件信息列表
      * @return 时间降序列表数据
@@ -138,7 +160,9 @@ public class FileService {
         } catch (IOException e) {
             log.warn("Read file directory error, path is : {}", fileDir, e);
         }
-        return fileInfoList.stream().sorted(Comparator.comparing(FileInfo::getDateTime)).collect(Collectors.toList());
+        return fileInfoList.stream().
+                sorted((o1, o2) -> o2.getDateTime().compareTo(o1.getDateTime()))
+                .collect(Collectors.toList());
     }
 
 }
