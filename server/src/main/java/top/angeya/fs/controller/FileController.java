@@ -10,7 +10,6 @@ import top.angeya.fs.service.FileService;
 import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.IOException;
 import java.util.List;
 
 /**
@@ -69,8 +68,18 @@ public class FileController {
 
 
     @GetMapping("/download-file")
-    public void downloadFile(String fileName, HttpServletResponse response) throws IOException {
+    public void downloadFile(String fileName, HttpServletResponse response) {
         this.fileService.downloadFile(fileName, response);
+    }
+
+    /**
+     * 删除文件
+     * @param fileName 文件名
+     * @return 删除结果
+     */
+    @DeleteMapping("/delete-file")
+    public boolean deleteFile(String fileName) {
+        return this.fileService.deleteFile(fileName);
     }
 
     /**

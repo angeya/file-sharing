@@ -138,6 +138,24 @@ public class FileService {
     }
 
     /**
+     * 删除文件
+     * @param fileName 文件名
+     * @return 删除结果
+     */
+    public boolean deleteFile(String fileName) {
+        Path path = Paths.get(this.fileDirectory, fileName);
+        boolean result = true;
+        try {
+            Files.deleteIfExists(path);
+            log.info("Delete file: {}", fileName);
+        } catch (IOException e) {
+            result = false;
+            log.error("Delete file error", e);
+        }
+        return result;
+    }
+
+    /**
      * 获取文件信息列表
      * @return 时间降序列表数据
      */
@@ -164,5 +182,4 @@ public class FileService {
                 sorted((o1, o2) -> o2.getDateTime().compareTo(o1.getDateTime()))
                 .collect(Collectors.toList());
     }
-
 }

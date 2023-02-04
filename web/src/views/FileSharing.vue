@@ -12,10 +12,11 @@
             action="api/file-service/upload">
           <i class="el-icon-upload"></i>
           <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-          <div class="el-upload__tip" slot="tip">文件上传说明</div>
+          <div class="el-upload__tip" slot="tip">文件最大为4G</div>
         </el-upload>
         <el-input
             type="textarea"
+            :rows="3"
             autosize
             placeholder="请输入内容"
             v-model="tempText">
@@ -39,7 +40,7 @@
           <el-table-column prop="" label="Operation" width="300">
             <template scope="scope">
               <el-button @click="downloadFile(scope.row.name)">Download</el-button>
-              <el-button @click="deleteFile">Delete</el-button>
+              <el-button @click="deleteFile(scope.row.name)">Delete</el-button>
             </template>
           </el-table-column>
         </el-table>
@@ -65,6 +66,7 @@ export default {
       fileList: []
     }
   },
+
   methods: {
     switchSizeUnit(size) {
       let result
@@ -77,6 +79,7 @@ export default {
       }
       return result
     },
+
     downloadFile(fileName) {
       // 文件下载需要设置responseType为blob
       this.axios.get('/file-service/download-file', {
@@ -102,19 +105,34 @@ export default {
         }
       })
     },
+
     uploadSuccess() {
       this.getFileList()
     },
-    deleteFile() {
-      this.axios.delete('/file-service/file').then(res => {
-        console.log(res)
+
+    deleteFile(fileName) {
+      this.$confirm(`确认删除文件 ${fileName} 吗?`, '提示', {
+        confirmButtonText: 'Yes',
+        cancelButtonText: 'No',
+        type: 'warning'
+      }).then(() => {
+        this.axios.delete('/file-service/delete-file', {
+          params: {fileName}
+        }).then(res => {
+          if (res.data) {
+            this.getFileList()
+          }
+          this.showOperateResult(res.data)
+        })
       })
     },
+
     getTempText() {
       this.axios.get('/file-service/temp-text').then(res => {
         this.tempText = res.data
       })
     },
+
     saveTempText(clean = false) {
       if (clean) {
         this.tempText = ''
@@ -125,10 +143,19 @@ export default {
         // do nothing
       })
     },
+
     getFileList() {
       this.axios.get('/file-service/file-list').then(res => {
         this.fileList = res.data
       })
+    },
+
+    showOperateResult(isSuccess) {
+      if (isSuccess) {
+        this.$message.success("Operate success")
+      } else {
+        this.$message.success("Operate failed")
+      }
     }
   },
   mounted() {
