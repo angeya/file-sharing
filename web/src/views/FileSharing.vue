@@ -33,10 +33,10 @@
           <el-table-column prop="name" label="File Name" width="200" align="center"></el-table-column>
           <el-table-column prop="size" label="File Size" width="200" align="center">
             <template scope="scope">
-              <span>{{switchSizeUnit(scope.row.size)}}</span>
+              <span>{{ switchSizeUnit(scope.row.size) }}</span>
             </template>
           </el-table-column>
-          <el-table-column prop="dateTime" label="Create Time" width="300"  align="center"></el-table-column>
+          <el-table-column prop="dateTime" label="Create Time" width="300" align="center"></el-table-column>
           <el-table-column prop="" label="Operation" width="300">
             <template scope="scope">
               <el-button @click="downloadFile(scope.row.name)">Download</el-button>
@@ -49,10 +49,31 @@
     <footer>
       <p>There is nothing in the footer!</p>
     </footer>
+
+    <!--  登录框  -->
+    <el-dialog
+        title="登 录"
+        :close-on-click-modal="false"
+        :close-on-press-escape="false"
+        :show-close="false"
+        :visible.sync="showLogin"
+        width="30%">
+      <el-input v-model="password" placeholder="请输入密码"
+                ref="passwordInput"
+                type="password"
+                :clearable="true"
+                @keyup.enter.native="login" ></el-input>
+      <span slot="footer" class="dialog-footer">
+        <el-button type="primary" @click="login">确 定</el-button>
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+
+import Constant from "@/js/Constant"
+import eventManager from "@/js/eventManager";
 
 const ONE_K = 1024
 const ONE_M = ONE_K * ONE_K
@@ -63,11 +84,20 @@ export default {
   data() {
     return {
       tempText: '',
-      fileList: []
+      fileList: [],
+      showLogin: true,
+      password: ''
     }
   },
 
   methods: {
+    login() {
+      this.axios.post('/file-service/login', this.password).then(res => {
+        if (res.data) {
+          this.showLogin = false
+        }
+      })
+    },
     switchSizeUnit(size) {
       let result
       if (size > ONE_M) {
@@ -84,7 +114,8 @@ export default {
       // 文件下载需要设置responseType为blob
       this.axios.get('/file-service/download-file', {
         responseType: "blob",
-        params: { fileName } } ).then(res => {
+        params: {fileName}
+      }).then(res => {
         let blob = new Blob([res.data]);
         if (window.navigator && window.navigator.msSaveOrOpenBlob) {
           // IE
@@ -156,11 +187,26 @@ export default {
       } else {
         this.$message.success("Operate failed")
       }
+    },
+    showLoginDialog() {
+      this.showLogin = true
+      this.$nextTick(() => {
+        this.$refs.passwordInput.focus()
+      })
     }
   },
+  created() {
+    eventManager.addEvent(Constant.GO_LOGIN, this.showLoginDialog)
+  },
   mounted() {
-    this.getTempText()
-    this.getFileList()
+    if (!this.showLogin) {
+      this.getTempText()
+      this.getFileList()
+    } else {
+      this.$nextTick(() => {
+        this.$refs.passwordInput.focus()
+      })
+    }
   }
 }
 </script>
@@ -170,16 +216,20 @@ export default {
   background-color aliceblue
   height 100vh
   margin 0 10px
+
   header
     height 12vh
     line-height 10vh
     border-bottom 1px solid black
+
   .main-container
     display flex
     height calc(100% - 16vh - 2px)
+
     aside
       border-right 1px solid black
       width 364px
+
   footer
     height 4vh
     border-top 1px solid black

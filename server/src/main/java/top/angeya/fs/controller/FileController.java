@@ -33,8 +33,9 @@ public class FileController {
      * @return 登录结果
      */
     @PostMapping("/login")
-    public boolean login(ServletRequest request, @RequestParam String password) {
-        return this.fileService.login((HttpServletRequest)request, password);
+    public boolean login(ServletRequest request, @RequestBody String password) {
+        // 使用post直接传字符串，参数会有多余的等号
+        return this.fileService.login((HttpServletRequest)request, password.replace("=", ""));
     }
 
     /**

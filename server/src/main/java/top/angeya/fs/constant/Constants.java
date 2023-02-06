@@ -15,9 +15,14 @@ public class Constants {
     public static final String SESSION_LOGIN_KEY = "login";
 
     /**
-     *
+     * 登录接口
      */
     public static final String LOGIN_URI = "file-service/login";
+
+    /**
+     * 需要登录时的返回值
+     */
+    public static final String GO_LOGIN = "goLogin";
 
     /**
      * 临时文本最大长度

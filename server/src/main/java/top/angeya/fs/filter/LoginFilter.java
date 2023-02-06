@@ -1,5 +1,6 @@
 package top.angeya.fs.filter;
 
+import org.springframework.stereotype.Component;
 import top.angeya.fs.constant.Constants;
 
 import javax.servlet.*;
@@ -12,7 +13,7 @@ import java.io.IOException;
  * @author Angeya
  * @createTime 2023/1/14 22:45
  */
-//@Component
+@Component
 public class LoginFilter implements Filter {
 
     @Override
@@ -32,7 +33,7 @@ public class LoginFilter implements Filter {
         if (isLogin) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
-            servletResponse.getWriter().write("you should login");
+            servletResponse.getWriter().write(Constants.GO_LOGIN);
         }
     }
 }
