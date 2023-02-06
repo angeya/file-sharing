@@ -95,6 +95,8 @@ export default {
       this.axios.post('/file-service/login', this.password).then(res => {
         if (res.data) {
           this.showLogin = false
+          this.getTempText()
+          this.getFileList()
         }
       })
     },
@@ -157,7 +159,6 @@ export default {
         })
       })
     },
-
     getTempText() {
       this.axios.get('/file-service/temp-text').then(res => {
         this.tempText = res.data
@@ -199,10 +200,7 @@ export default {
     eventManager.addEvent(Constant.GO_LOGIN, this.showLoginDialog)
   },
   mounted() {
-    if (!this.showLogin) {
-      this.getTempText()
-      this.getFileList()
-    } else {
+    if (this.showLogin) {
       this.$nextTick(() => {
         this.$refs.passwordInput.focus()
       })
