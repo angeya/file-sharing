@@ -22,6 +22,10 @@ public class LoginFilter implements Filter {
         String uri = httpRequest.getRequestURI();
         boolean isLogin;
 
+        if (uri.matches("^.*(.js|.css|.font|.svg|.woff|.ttf|.ico|.html)$") || uri.matches("/")) {
+            filterChain.doFilter(servletRequest, servletResponse);
+        }
+
         // 判断是否登录
         if (uri.contains(Constants.HAS_LOGIN_URI)) {
             Boolean hasLogin = hasSession(httpRequest)? Boolean.TRUE : Boolean.FALSE;

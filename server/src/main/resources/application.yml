@@ -1,8 +1,8 @@
 server:
-  port: 8888
+  port: 666
   servlet:
     session:
-      timeout: 24h
+      timeout: 3h
 
 spring:
   application:
