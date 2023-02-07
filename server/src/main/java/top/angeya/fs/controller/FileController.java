@@ -27,6 +27,15 @@ public class FileController {
     private final FileService fileService;
 
     /**
+     * 是否已经登录
+     * @return 文本
+     */
+    @GetMapping("/has-login")
+    public String hasLogin() {
+        return "";
+    }
+
+    /**
      * 登录
      * @param request 请求
      * @param password 密码

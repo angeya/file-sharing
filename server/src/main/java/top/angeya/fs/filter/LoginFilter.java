@@ -20,20 +20,30 @@ public class LoginFilter implements Filter {
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest)servletRequest;
         String uri = httpRequest.getRequestURI();
-        boolean isLogin = false;
+        boolean isLogin;
+
+        // 判断是否登录
+        if (uri.contains(Constants.HAS_LOGIN_URI)) {
+            Boolean hasLogin = hasSession(httpRequest)? Boolean.TRUE : Boolean.FALSE;
+            servletResponse.getWriter().write(hasLogin.toString());
+            return;
+        }
+
         if (uri.contains(Constants.LOGIN_URI)) {
             isLogin = true;
         } else {
-            HttpSession session = httpRequest.getSession();
-            Object object = session.getAttribute(Constants.SESSION_LOGIN_KEY);
-            if (object != null) {
-                isLogin = true;
-            }
+            isLogin = this.hasSession(httpRequest);
         }
         if (isLogin) {
             filterChain.doFilter(servletRequest, servletResponse);
         } else {
             servletResponse.getWriter().write(Constants.GO_LOGIN);
         }
+    }
+
+    private boolean hasSession(HttpServletRequest httpRequest) {
+        HttpSession session = httpRequest.getSession();
+        Object object = session.getAttribute(Constants.SESSION_LOGIN_KEY);
+        return object != null;
     }
 }

@@ -20,6 +20,11 @@ public class Constants {
     public static final String LOGIN_URI = "file-service/login";
 
     /**
+     * 判断是否登录接口
+     */
+    public static final String HAS_LOGIN_URI = "file-service/has-login";
+
+    /**
      * 需要登录时的返回值
      */
     public static final String GO_LOGIN = "goLogin";

@@ -21,8 +21,8 @@
             placeholder="请输入内容"
             v-model="tempText">
         </el-input>
-        <el-button @click="saveTempText">Save</el-button>
-        <el-button @click="saveTempText">Clean</el-button>
+        <el-button @click="saveTempText(false)">Save</el-button>
+        <el-button @click="saveTempText(true)">Clean</el-button>
       </aside>
       <main>
         <el-table
@@ -79,6 +79,8 @@ const ONE_K = 1024
 const ONE_M = ONE_K * ONE_K
 const FILE_SIZE_DECIMAL_NUMBER = 2
 
+const TEST_PASSWORD = '0000'
+
 export default {
   name: "FileSharing",
   data() {
@@ -94,9 +96,24 @@ export default {
     login() {
       this.axios.post('/file-service/login', this.password).then(res => {
         if (res.data) {
-          this.showLogin = false
-          this.getTempText()
-          this.getFileList()
+          this.afterLogin()
+        }
+      })
+    },
+    afterLogin() {
+      this.showLogin = false
+      this.getTempText()
+      this.getFileList()
+    },
+    hasLogin() {
+      this.axios.get('/file-service/has-login',).then(res => {
+        if (res.data) {
+          this.afterLogin()
+        } else {
+          this.showLogin = true
+          this.$nextTick(() => {
+            this.$refs.passwordInput.focus()
+          })
         }
       })
     },
@@ -194,17 +211,13 @@ export default {
       this.$nextTick(() => {
         this.$refs.passwordInput.focus()
       })
-    }
+    },
   },
   created() {
     eventManager.addEvent(Constant.GO_LOGIN, this.showLoginDialog)
   },
   mounted() {
-    if (this.showLogin) {
-      this.$nextTick(() => {
-        this.$refs.passwordInput.focus()
-      })
-    }
+    this.hasLogin()
   }
 }
 </script>
