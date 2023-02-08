@@ -50,4 +50,14 @@ public class LoginFilter implements Filter {
         Object object = session.getAttribute(Constants.SESSION_LOGIN_KEY);
         return object != null;
     }
+
+    @Override
+    public void init(FilterConfig filterConfig) throws ServletException {
+
+    }
+
+    @Override
+    public void destroy() {
+
+    }
 }

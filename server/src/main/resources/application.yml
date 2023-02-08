@@ -1,5 +1,5 @@
 server:
-  port: 666
+  port: 8088
   servlet:
     session:
       timeout: 3h
@@ -16,7 +16,7 @@ spring:
 app:
   version: 1.0.0
   file:
-    dir: D:/root/file-sharing # 文件存储路径
+    dir: /root/myapp/file-sharing/files # 文件存储路径
     max-number: 10 # 文件最大数量
     max-total-size: 5000000000 # 所有文件最大容量 5G
   password:
