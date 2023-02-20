@@ -79,8 +79,6 @@ const ONE_K = 1024
 const ONE_M = ONE_K * ONE_K
 const FILE_SIZE_DECIMAL_NUMBER = 2
 
-const TEST_PASSWORD = '0000'
-
 export default {
   name: "FileSharing",
   data() {
@@ -97,6 +95,15 @@ export default {
       this.axios.post('/file-service/login', this.password).then(res => {
         if (res.data) {
           this.afterLogin()
+          this.$message({
+            message: '登录成功！',
+            type: 'success'
+          });
+        } else {
+          this.$message({
+            message: '登录失败(密码错误)',
+            type: 'error'
+          });
         }
       })
     },
