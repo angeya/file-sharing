@@ -1,5 +1,7 @@
 package top.angeya.fs.filter;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 import top.angeya.fs.constant.Constants;
 
@@ -16,11 +18,15 @@ import java.io.IOException;
 @Component
 public class LoginFilter implements Filter {
 
+    private static final Logger logger = LoggerFactory.getLogger(LoginFilter.class);
+
     @Override
     public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain) throws IOException, ServletException {
         HttpServletRequest httpRequest = (HttpServletRequest)servletRequest;
         String uri = httpRequest.getRequestURI();
         boolean isLogin;
+
+        logger.info("---request address: {}, url: {}", httpRequest.getRemoteAddr(), uri);
 
         if (uri.matches("^.*(.js|.css|.font|.svg|.woff|.ttf|.ico|.html)$") || uri.matches("/")) {
             filterChain.doFilter(servletRequest, servletResponse);
