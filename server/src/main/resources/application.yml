@@ -21,3 +21,4 @@ app:
     max-total-size: 5000000000 # 所有文件最大容量 5G
   password:
     offset: 2 # 密码偏移
+    long-term: sunnyangeya # 长期密码

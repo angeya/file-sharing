@@ -57,17 +57,28 @@ public class FileService {
     public long fileMaxTotalSize;
 
     /**
+     * 长期密码
+     */
+    @Value("${app.password.long-term}")
+    private String longTermPassword;
+
+    /**
      * 临时文本
      */
     private String tempText;
 
     /**
-     * 登录
+     * 登录，优先使用长期密码匹配
      * 系统密码 = （月份 + 密码偏移） + （当月日期 + 密码偏移） + (小时 * 2)
      * @param password 密码
      * @return 是否登录成功
      */
     public boolean login(HttpServletRequest request, String password) {
+        if (longTermPassword.equals(password)) {
+            request.getSession().setAttribute(Constants.SESSION_LOGIN_KEY, true);
+            log.info("long-term user login ip: {}, result: {}", request.getLocalAddr(), true);
+            return true;
+        }
         LocalDateTime localDateTime = LocalDateTime.now();
         int month = localDateTime.getMonthValue();
         int day = localDateTime.getDayOfMonth();

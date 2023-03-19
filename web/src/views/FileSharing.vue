@@ -9,7 +9,7 @@
             class="upload-demo"
             drag
             :on-success="uploadSuccess"
-            action="api/file-service/upload">
+            :action="uploadUrl">
           <i class="el-icon-upload"></i>
           <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
           <div class="el-upload__tip" slot="tip">文件最大为4G</div>
@@ -86,12 +86,34 @@ export default {
       tempText: '',
       fileList: [],
       showLogin: true,
-      password: ''
+      password: '',
+      useLongTermPassword: true
+    }
+  },
+  computed: {
+    uploadUrl() {
+      const prefix = process.env.NODE_ENV === 'production'? '': 'api'
+      return  prefix + '/file-service/upload'
     }
   },
 
   methods: {
-    login() {
+    /**
+     * 登录
+     * @param isManual 是否手动登录，如果是手动登录，并且使用长期密码，需要保存在localstorage中，方便下次自动登录
+     **/
+    login(isManual = true) {
+      if (!this.password) {
+        this.$message({
+          message: '请输入密码',
+          type: 'warning'
+        })
+        return
+      }
+      // 如果是用长期密码，需要把前面的标志去掉
+      const useLongTermPassword = this.password.indexOf(Constant.LONG_TERM_PASSWORD_SIGN) === 0
+      this.password = this.password.replaceAll(Constant.LONG_TERM_PASSWORD_SIGN, '')
+
       this.axios.post('/file-service/login', this.password).then(res => {
         if (res.data) {
           this.afterLogin()
@@ -99,6 +121,9 @@ export default {
             message: '登录成功！',
             type: 'success'
           });
+          if (isManual && useLongTermPassword) {
+            localStorage.setItem(Constant.LONG_TERM_PASSWORD, this.password)
+          }
         } else {
           this.$message({
             message: '登录失败(密码错误)',
@@ -119,10 +144,27 @@ export default {
         } else {
           this.showLogin = true
           this.$nextTick(() => {
-            this.$refs.passwordInput.focus()
+
           })
+          this.autoLogin()
         }
       })
+    },
+    /**
+     * 尝试自动登录
+     */
+    autoLogin() {
+      const longTermPassword =  localStorage.getItem(Constant.LONG_TERM_PASSWORD)
+      if (longTermPassword) {
+        this.password = longTermPassword
+        this.login()
+        this.$message({
+          message: '自动登录中...',
+          type: 'info'
+        });
+      } else {
+        this.$refs.passwordInput.focus()
+      }
     },
     switchSizeUnit(size) {
       let result
