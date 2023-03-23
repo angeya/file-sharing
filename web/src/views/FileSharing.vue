@@ -208,6 +208,7 @@ export default {
         this.$message.warning("请不要频繁操作，OK？")
         return
       }
+      this.$message.success("文件已经在以闪电般的速度下载了，不显示下载进度更有神秘感哦...")
       // 文件下载需要设置responseType为blob
       this.axios.get('/file-service/download-file', {
         responseType: "blob",
@@ -231,7 +232,6 @@ export default {
           // 只要映射存在，Blob就不能进行垃圾回收，因此一旦不再需要引用，就必须小心撤销URL，释放掉blob对象。
           window.URL.revokeObjectURL(objectUrl);
         }
-        this.$message.success("文件已经在以闪电般的速度下载了，不显示下载进度更有神秘感哦...")
       })
     },
 
