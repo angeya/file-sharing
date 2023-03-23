@@ -63,6 +63,12 @@ public class FileService {
     private String longTermPassword;
 
     /**
+     * 临时文件最大长度
+     */
+    @Value("${app.temp-text.max-length}")
+    private Integer tempTextMaxLength;
+
+    /**
      * 临时文本
      */
     private String tempText;
@@ -109,8 +115,8 @@ public class FileService {
         if (tempText == null) {
             return false;
         }
-        if (tempText.length() > Constants.TEMP_TEXT_MAX_LENGTH) {
-            this.tempText = tempText.substring(0, Constants.TEMP_TEXT_MAX_LENGTH);
+        if (tempText.length() > this.tempTextMaxLength) {
+            this.tempText = tempText.substring(0, this.tempTextMaxLength);
         } else {
             this.tempText = tempText;
         }

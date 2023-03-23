@@ -6,15 +6,15 @@
     <div class="main-container">
       <aside>
         <el-upload
-            class="upload-demo"
             drag
             :on-success="uploadSuccess"
             :action="uploadUrl">
           <i class="el-icon-upload"></i>
           <div class="el-upload__text">将文件拖到此处，或<em>点击上传</em></div>
-          <div class="el-upload__tip" slot="tip">文件最大为4G</div>
+          <div class="el-upload__tip" slot="tip">文件最大为 100 M</div>
         </el-upload>
         <el-input
+            class="temp-text-class"
             type="textarea"
             :rows="3"
             autosize
@@ -87,6 +87,9 @@ export default {
       fileList: [],
       showLogin: true,
       password: '',
+      // 记录需要等待才可以继续下载的文件，避免频繁下载
+      waitDownloadFileMap: new Map(),
+      // 是否使用的是长期密码
       useLongTermPassword: true
     }
   },
@@ -137,6 +140,9 @@ export default {
       this.getTempText()
       this.getFileList()
     },
+    /**
+     * 判断是否已经登录
+     * */
     hasLogin() {
       this.axios.get('/file-service/has-login',).then(res => {
         if (res.data) {
@@ -177,8 +183,31 @@ export default {
       }
       return result
     },
-
+    /**
+     * 判断当前文件是否可以下载
+     **/
+    canDownloadThisFile(fileName) {
+      const shouldWait = this.waitDownloadFileMap.get(fileName)
+      if (shouldWait) {
+        return false
+      }
+      this.waitDownloadFileMap.set(fileName, true)
+      // 设置30秒冷却时间，不允许频繁操作
+      setTimeout(() => {
+        this.waitDownloadFileMap.set(fileName, false)
+      }, 30000)
+      return true
+    },
+    /**
+     * 下载文件
+     * @param fileName 文件名
+     */
     downloadFile(fileName) {
+      const canDownload = this.canDownloadThisFile(fileName)
+      if (!canDownload) {
+        this.$message.warning("请不要频繁操作，OK？")
+        return
+      }
       // 文件下载需要设置responseType为blob
       this.axios.get('/file-service/download-file', {
         responseType: "blob",
@@ -202,6 +231,7 @@ export default {
           // 只要映射存在，Blob就不能进行垃圾回收，因此一旦不再需要引用，就必须小心撤销URL，释放掉blob对象。
           window.URL.revokeObjectURL(objectUrl);
         }
+        this.$message.success("文件已经在以闪电般的速度下载了，不显示下载进度更有神秘感哦...")
       })
     },
 
@@ -237,8 +267,10 @@ export default {
       }
       this.axios.put('/file-service/temp-text', {
         content: this.tempText
-      }).then(res => {
-        // do nothing
+      }).then((res) => {
+        if (res && res.data) {
+          this.showOperateResult(res.data)
+        }
       })
     },
 
@@ -252,7 +284,7 @@ export default {
       if (isSuccess) {
         this.$message.success("Operate success")
       } else {
-        this.$message.success("Operate failed")
+        this.$message.error("Operate failed")
       }
     },
     showLoginDialog() {
@@ -289,6 +321,14 @@ export default {
     aside
       border-right 1px solid black
       width 364px
+      height 100%
+      .temp-text-class
+        height calc(100% - 248px)
+        overflow-y hidden
+        /deep/ .el-textarea__inner
+          height 100%!important
+          overflow-y auto
+
 
   footer
     height 4vh
