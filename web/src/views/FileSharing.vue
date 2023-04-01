@@ -7,6 +7,8 @@
       <aside>
         <el-upload
             drag
+            :multiple="false"
+            :show-file-list="true"
             :on-success="uploadSuccess"
             :action="uploadUrl">
           <i class="el-icon-upload"></i>
@@ -323,7 +325,7 @@ export default {
       width 364px
       height 100%
       .temp-text-class
-        height calc(100% - 248px)
+        height calc(100% - 300px)
         overflow-y hidden
         /deep/ .el-textarea__inner
           height 100%!important
